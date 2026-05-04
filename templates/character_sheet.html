@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лист персонажа • D&D Creator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --dnd-dark: #1a1a2e;
+            --dnd-darker: #0f0f1a;
+            --dnd-accent: #c9a227;
+            --dnd-accent-hover: #e6c35c;
+            --dnd-text: #e0e0e0;
+            --dnd-muted: #8a8aa0;
+            --dnd-border: #3a3a5a;
+            --dnd-card: rgba(25, 25, 45, 0.85);
+        }
+        body {
+            background: linear-gradient(135deg, var(--dnd-darker) 0%, var(--dnd-dark) 100%);
+            font-family: 'Roboto', sans-serif;
+            color: var(--dnd-text);
+            margin: 0;
+            padding-top: 70px;
+            min-height: 100vh;
+        }
+        .nav-dnd {
+            position: fixed; top: 0; left: 0; right: 0; height: 60px;
+            background: rgba(15, 15, 26, 0.95); border-bottom: 1px solid var(--dnd-border);
+            display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; z-index: 1000;
+        }
+        .nav-brand { font-family: 'Cinzel', serif; font-weight: 700; color: var(--dnd-accent); text-decoration: none; }
+        .nav-back { color: var(--dnd-text); text-decoration: none; font-size: 0.9rem; padding: 0.4rem 0.8rem; border: 1px solid var(--dnd-border); border-radius: 6px; transition: 0.2s; }
+        .nav-back:hover { color: var(--dnd-accent); border-color: var(--dnd-accent); }
+
+        .sheet-container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .sheet-card {
+            background: var(--dnd-card); border: 1px solid var(--dnd-border);
+            border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+        .section-title {
+            font-family: 'Cinzel', serif; color: #fff; font-size: 1.2rem; margin: 0 0 1rem;
+            border-bottom: 2px solid var(--dnd-accent); padding-bottom: 0.3rem; display: inline-block;
+        }
+
+        /* Inputs */
+        .dnd-input {
+            background: rgba(15, 15, 25, 0.6); border: 1px solid var(--dnd-border);
+            color: #fff; border-radius: 6px; padding: 0.5rem 0.8rem; width: 100%;
+            transition: 0.2s;
+        }
+        .dnd-input:focus { border-color: var(--dnd-accent); box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.2); outline: none; }
+        .dnd-label { color: var(--dnd-muted); font-size: 0.85rem; margin-bottom: 0.3rem; display: block; }
+
+        /* Ability Scores */
+        .abilities-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; }
+        .ability-box { text-align: center; background: rgba(10,10,20,0.5); border-radius: 8px; padding: 0.8rem; border: 1px solid var(--dnd-border); }
+        .ability-name { font-family: 'Cinzel', serif; font-weight: 700; font-size: 1.1rem; margin-bottom: 0.4rem; }
+        .ability-mod {
+            font-size: 1.8rem; font-weight: 700; color: var(--dnd-accent); margin: 0.2rem 0;
+            display: block; min-height: 1.5em;
+        }
+        .ability-score-input { width: 80px; margin: 0 auto; display: block; text-align: center; }
+
+        /* Combat */
+        .combat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 1rem; text-align: center; }
+        .combat-box { background: rgba(10,10,20,0.5); border: 1px solid var(--dnd-border); border-radius: 8px; padding: 0.8rem; }
+        .combat-val { font-size: 1.4rem; font-weight: 700; color: #fff; margin-top: 0.2rem; }
+
+        /* HP & Saves */
+        .hp-section { display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: center; }
+        .hp-current, .hp-max { width: 100px; }
+        .death-saves { display: flex; gap: 0.5rem; align-items: center; margin-left: auto; }
+        .save-circle { width: 18px; height: 18px; border: 2px solid var(--dnd-border); border-radius: 50%; cursor: pointer; transition: 0.2s; }
+        .save-circle.success { border-color: #4ade80; background: #4ade80; }
+        .save-circle.fail { border-color: #f87171; background: #f87171; }
+
+        /* Tables & Textareas */
+        .dnd-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+        .dnd-table th { text-align: left; color: var(--dnd-muted); font-size: 0.85rem; padding: 0.4rem; border-bottom: 1px solid var(--dnd-border); }
+        .dnd-table td { padding: 0.3rem; }
+        .dnd-textarea { width: 100%; min-height: 100px; resize: vertical; background: rgba(15, 15, 25, 0.6); border: 1px solid var(--dnd-border); color: #fff; border-radius: 6px; padding: 0.8rem; }
+
+        /* Actions */
+        .sheet-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem; }
+        .btn-dnd {
+            background: linear-gradient(135deg, var(--dnd-accent), #a6841e); color: var(--dnd-darker);
+            border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s;
+        }
+        .btn-dnd:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(201, 162, 39, 0.3); }
+        .btn-secondary-dnd { background: transparent; border: 1px solid var(--dnd-border); color: var(--dnd-text); padding: 0.7rem 1.5rem; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .btn-secondary-dnd:hover { border-color: var(--dnd-accent); color: var(--dnd-accent); }
+
+        @media (max-width: 768px) {
+            .abilities-grid { grid-template-columns: repeat(3, 1fr); }
+            .sheet-actions { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav-dnd">
+        <a href="{{ url_for('index') }}" class="nav-brand">🎲 D&D Creator</a>
+        <a href="{{ url_for('index') }}" class="nav-back">← Назад в меню</a>
+    </nav>
+
+    <main class="sheet-container">
+        <form id="characterForm">
+            <!-- Шапка -->
+            <div class="sheet-card">
+                <h2 class="section-title">📜 Основная информация</h2>
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="dnd-label">Имя персонажа</label><input type="text" class="dnd-input" name="char_name"></div>
+                    <div class="col-md-3"><label class="dnd-label">Класс & Уровень</label><input type="text" class="dnd-input" name="class_level" placeholder="Напр. Воин 1"></div>
+                    <div class="col-md-3"><label class="dnd-label">Раса</label><input type="text" class="dnd-input" name="race"></div>
+                    <div class="col-md-3"><label class="dnd-label">Предыстория</label><input type="text" class="dnd-input" name="background"></div>
+                    <div class="col-md-3"><label class="dnd-label">Выравнивание</label><input type="text" class="dnd-input" name="alignment"></div>
+                    <div class="col-md-3"><label class="dnd-label">Опыт (XP)</label><input type="number" class="dnd-input" name="xp" value="0"></div>
+                </div>
+            </div>
+
+            <!-- Характеристики -->
+            <div class="sheet-card">
+                <h2 class="section-title">💪 Характеристики</h2>
+                <div class="abilities-grid">
+                    <!-- Генерируется 6 блоков через JS или вручную, здесь вручную для наглядности -->
+                    <div class="ability-box" data-ability="str">
+                        <div class="ability-name">СИЛ</div>
+                        <span class="ability-mod">+0</span>
+                        <input type="number" class="dnd-input ability-score-input" name="str_score" value="10" min="1" max="30">
+                    </div>
+                    <div class="ability-box" data-ability="dex">
+                        <div class="ability-name">ЛОВ</div>
+                        <span class="ability-mod">+0</span>
+                        <input type="number" class="dnd-input ability-score-input" name="dex_score" value="10" min="1" max="30">
+                    </div>
+                    <div class="ability-box" data-ability="con">
+                        <div class="ability-name">ТЕЛ</div>
+                        <span class="ability-mod">+0</span>
+                        <input type="number" class="dnd-input ability-score-input" name="con_score" value="10" min="1" max="30">
+                    </div>
+                    <div class="ability-box" data-ability="int">
+                        <div class="ability-name">ИНТ</div>
+                        <span class="ability-mod">+0</span>
+                        <input type="number" class="dnd-input ability-score-input" name="int_score" value="10" min="1" max="30">
+                    </div>
+                    <div class="ability-box" data-ability="wis">
+                        <div class="ability-name">МДР</div>
+                        <span class="ability-mod">+0</span>
+                        <input type="number" class="dnd-input ability-score-input" name="wis_score" value="10" min="1" max="30">
+                    </div>
+                    <div class="ability-box" data-ability="cha">
+                        <div class="ability-name">ХАР</div>
+                        <span class="ability-mod">+0</span>
+                        <input type="number" class="dnd-input ability-score-input" name="cha_score" value="10" min="1" max="30">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Бой & ЗС -->
+            <div class="sheet-card">
+                <h2 class="section-title">⚔️ Бой & Здоровье</h2>
+                <div class="combat-grid mb-3">
+                    <div class="combat-box"><div class="dnd-label">КД</div><input type="number" class="dnd-input" name="ac" style="width:80px; margin:0 auto; text-align:center;"></div>
+                    <div class="combat-box"><div class="dnd-label">Инициатива</div><div class="combat-val" id="initiative">+0</div></div>
+                    <div class="combat-box"><div class="dnd-label">Скорость</div><input type="number" class="dnd-input" name="speed" value="30" style="width:80px; margin:0 auto; text-align:center;"></div>
+                    <div class="combat-box"><div class="dnd-label">Бонус мастерства</div><input type="number" class="dnd-input" name="prof_bonus" value="2" style="width:80px; margin:0 auto; text-align:center;"></div>
+                </div>
+                <div class="hp-section">
+                    <div><div class="dnd-label">Тек. ОЗ</div><input type="number" class="dnd-input hp-current" name="hp_current" value="10"></div>
+                    <div><div class="dnd-label">Макс. ОЗ</div><input type="number" class="dnd-input hp-max" name="hp_max" value="10"></div>
+                    <div><div class="dnd-label">Врем. ОЗ</div><input type="number" class="dnd-input" name="hp_temp" value="0" style="width:80px; text-align:center;"></div>
+                    <div class="death-saves">
+                        <span class="dnd-label" style="margin:0">Спасброски смерти:</span>
+                        <span class="dnd-label" style="color:#4ade80">✓</span>
+                        <div class="save-circle" data-type="success"></div><div class="save-circle" data-type="success"></div><div class="save-circle" data-type="success"></div>
+                        <span class="dnd-label" style="color:#f87171">✗</span>
+                        <div class="save-circle" data-type="fail"></div><div class="save-circle" data-type="fail"></div><div class="save-circle" data-type="fail"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Атаки & Способности -->
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="sheet-card">
+                        <h2 class="section-title">🗡️ Атаки & Заклинания</h2>
+                        <table class="dnd-table">
+                            <thead><tr><th>Название</th><th>Бонус</th><th>Урон/Тип</th></tr></thead>
+                            <tbody>
+                                <tr><td><input type="text" class="dnd-input" name="atk1_name"></td><td><input type="text" class="dnd-input" name="atk1_bonus"></td><td><input type="text" class="dnd-input" name="atk1_dmg"></td></tr>
+                                <tr><td><input type="text" class="dnd-input" name="atk2_name"></td><td><input type="text" class="dnd-input" name="atk2_bonus"></td><td><input type="text" class="dnd-input" name="atk2_dmg"></td></tr>
+                                <tr><td><input type="text" class="dnd-input" name="atk3_name"></td><td><input type="text" class="dnd-input" name="atk3_bonus"></td><td><input type="text" class="dnd-input" name="atk3_dmg"></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="sheet-card">
+                        <h2 class="section-title">✨ Особенности & Язык</h2>
+                        <textarea class="dnd-textarea" name="features_traits" placeholder="Расовые черты, классовые умения, языки..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Экипировка & Личность -->
+            <div class="row g-3 mt-1">
+                <div class="col-md-6">
+                    <div class="sheet-card">
+                        <h2 class="section-title">🎒 Экипировка & Золото</h2>
+                        <textarea class="dnd-textarea" name="equipment" style="min-height:120px;" placeholder="Одежда, оружие, зелья, магические предметы..."></textarea>
+                        <div class="row g-2 mt-2">
+                            <div class="col-3"><div class="dnd-label">ММ</div><input type="number" class="dnd-input" name="copper" value="0"></div>
+                            <div class="col-3"><div class="dnd-label">СМ</div><input type="number" class="dnd-input" name="silver" value="0"></div>
+                            <div class="col-3"><div class="dnd-label">ЭМ</div><input type="number" class="dnd-input" name="electrum" value="0"></div>
+                            <div class="col-3"><div class="dnd-label">ЗМ</div><input type="number" class="dnd-input" name="gold" value="0"></div>
+                            <div class="col-3"><div class="dnd-label">ПМ</div><input type="number" class="dnd-input" name="platinum" value="0"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="sheet-card">
+                        <h2 class="section-title">🧠 Личность & История</h2>
+                        <div class="mb-2"><div class="dnd-label">Черты характера</div><input type="text" class="dnd-input" name="personality_traits"></div>
+                        <div class="mb-2"><div class="dnd-label">Идеалы</div><input type="text" class="dnd-input" name="ideals"></div>
+                        <div class="mb-2"><div class="dnd-label">Привязанности</div><input type="text" class="dnd-input" name="bonds"></div>
+                        <div><div class="dnd-label">Изъяны</div><input type="text" class="dnd-input" name="flaws"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sheet-actions">
+                <button type="button" class="btn-secondary-dnd" onclick="window.print()">🖨️ Печать / PDF</button>
+                <button type="submit" class="btn-dnd">💾 Сохранить черновик</button>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        // Автоматический расчёт модификаторов
+        document.querySelectorAll('.ability-score-input').forEach(input => {
+            input.addEventListener('input', (e) => {
+                const score = parseInt(e.target.value) || 10;
+                const mod = Math.floor((score - 10) / 2);
+                const display = mod >= 0 ? `+${mod}` : mod;
+                e.target.parentElement.querySelector('.ability-mod').textContent = display;
+
+                // Обновляем инициативу по ЛОВ
+                if(e.target.name === 'dex_score') {
+                    document.getElementById('initiative').textContent = display;
+                }
+            });
+        });
+
+        // Кликабельные круги спасбросков смерти
+        document.querySelectorAll('.save-circle').forEach(circle => {
+            circle.addEventListener('click', function() {
+                this.classList.toggle(this.dataset.type);
+            });
+        });
+
+        // Заглушка сохранения
+        document.getElementById('characterForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Шаблон готов! Данные можно отправить на бэкенд или скачать как JSON.');
+        });
+    </script>
+</body>
+</html>

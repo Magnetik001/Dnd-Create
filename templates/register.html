@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} • D&D Character Creator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --dnd-dark: #1a1a2e;
+            --dnd-darker: #0f0f1a;
+            --dnd-accent: #c9a227;
+            --dnd-accent-hover: #e6c35c;
+            --dnd-text: #e0e0e0;
+            --dnd-border: #3a3a5a;
+        }
+        body {
+            background: linear-gradient(135deg, var(--dnd-darker) 0%, var(--dnd-dark) 100%);
+            font-family: 'Roboto', sans-serif;
+            color: var(--dnd-text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .auth-card {
+            background: rgba(30, 30, 50, 0.95);
+            border: 2px solid var(--dnd-border);
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(201, 162, 39, 0.1);
+            max-width: 450px;
+            width: 100%;
+            padding: 2.5rem 2rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, transparent, var(--dnd-accent), transparent);
+        }
+        .auth-title {
+            font-family: 'Cinzel', serif;
+            color: var(--dnd-accent);
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .form-label { font-weight: 500; color: #b0b0c0; margin-bottom: 0.4rem; }
+        .form-control {
+            background: rgba(25, 25, 45, 0.8);
+            border: 1px solid var(--dnd-border);
+            color: var(--dnd-text);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .form-control:focus {
+            background: rgba(35, 35, 60, 0.9);
+            border-color: var(--dnd-accent);
+            box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.15);
+            color: #fff;
+        }
+        .form-control::placeholder { color: #6a6a8a; }
+        .btn-dnd {
+            background: linear-gradient(135deg, var(--dnd-accent) 0%, #a6841e 100%);
+            border: none;
+            color: #1a1a2e;
+            font-weight: 600;
+            padding: 0.75rem;
+            border-radius: 8px;
+            width: 100%;
+            transition: all 0.2s ease;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-size: 0.95rem;
+        }
+        .btn-dnd:hover {
+            background: linear-gradient(135deg, var(--dnd-accent-hover) 0%, #c9a227 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(201, 162, 39, 0.3);
+            color: #0f0f1a;
+        }
+        .alert-custom {
+            background: rgba(180, 50, 50, 0.15);
+            border: 1px solid rgba(220, 80, 80, 0.4);
+            color: #ffb3b3;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.25rem;
+        }
+        .auth-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--dnd-border);
+            font-size: 0.9rem;
+            color: #8a8aa0;
+        }
+        .auth-footer a { color: var(--dnd-accent); text-decoration: none; font-weight: 500; }
+        .auth-footer a:hover { color: var(--dnd-accent-hover); text-decoration: underline; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .auth-card { animation: fadeInUp 0.4s ease-out; }
+    </style>
+</head>
+<body>
+    <div class="auth-card">
+        <h1 class="auth-title">⚔️ {{ title }}</h1>
+
+        {% if message %}
+        <div class="alert-custom" role="alert">⚠️ {{ message }}</div>
+        {% endif %}
+
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+                {{ form.login.label(class="form-label") }}
+                {{ form.login(class="form-control", placeholder="Придумайте логин") }}
+                {% if form.login.errors %}<div class="text-danger small mt-1">{{ form.login.errors[0] }}</div>{% endif %}
+            </div>
+
+            <div class="mb-3">
+                {{ form.email.label(class="form-label") }}
+                {{ form.email(class="form-control", placeholder="example@mail.com") }}
+                {% if form.email.errors %}<div class="text-danger small mt-1">{{ form.email.errors[0] }}</div>{% endif %}
+            </div>
+
+            <div class="mb-3">
+                {{ form.password.label(class="form-label") }}
+                {{ form.password(class="form-control", placeholder="••••••••") }}
+                {% if form.password.errors %}<div class="text-danger small mt-1">{{ form.password.errors[0] }}</div>{% endif %}
+            </div>
+
+            <div class="mb-4">
+                {{ form.repeat_password.label(class="form-label") }}
+                {{ form.repeat_password(class="form-control", placeholder="Повторите пароль") }}
+                {% if form.repeat_password.errors %}<div class="text-danger small mt-1">{{ form.repeat_password.errors[0] }}</div>{% endif %}
+            </div>
+
+            {{ form.submit(class="btn btn-dnd") }}
+        </form>
+
+        <div class="auth-footer">
+            <p class="mb-0">Уже есть аккаунт? <a href="{{ url_for('login') }}">Войти</a></p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const firstInput = document.querySelector('form .form-control');
+            if (firstInput) firstInput.focus();
+            const alert = document.querySelector('.alert-custom');
+            if (alert) {
+                alert.style.cursor = 'pointer';
+                alert.addEventListener('click', function() {
+                    this.style.transition = 'opacity 0.3s';
+                    this.style.opacity = '0';
+                    setTimeout(() => this.remove(), 300);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
