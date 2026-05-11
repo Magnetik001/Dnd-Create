@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ character.char_name }} - Character Sheet</title>
+    <style>
+        @page { size: A4; margin: 15mm; }
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 10pt;
+            margin: 0;
+            padding: 0;
+            color: #1a1510;
+        }
+        h1 {
+            font-family: Georgia, serif;
+            text-align: center;
+            font-size: 24pt;
+            margin: 0 0 15px 0;
+            border-bottom: 3px double #2c241b;
+            padding-bottom: 10px;
+        }
+        .header-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .field {
+            border: 1px solid #2c241b;
+            padding: 4px 6px;
+            background: #f4f1e8;
+        }
+        .field-label {
+            font-size: 7pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #8b6914;
+            margin-bottom: 2px;
+        }
+        .field-value {
+            font-size: 11pt;
+            font-weight: bold;
+        }
+        .main-grid {
+            display: grid;
+            grid-template-columns: 180px 1fr 280px;
+            gap: 15px;
+        }
+        .column {
+            border-right: 1px solid #d4c4a8;
+            padding-right: 15px;
+        }
+        .column:last-child {
+            border-right: none;
+            padding-right: 0;
+        }
+        .section {
+            margin-bottom: 15px;
+            border: 1px solid #2c241b;
+            padding: 8px;
+            background: #faf8f0;
+        }
+        .section-title {
+            font-family: Georgia, serif;
+            font-size: 11pt;
+            font-weight: bold;
+            border-bottom: 1px solid #d4c4a8;
+            margin-bottom: 8px;
+            padding-bottom: 3px;
+            color: #8b6914;
+        }
+        .ability-box {
+            text-align: center;
+            border: 2px solid #2c241b;
+            padding: 6px;
+            margin-bottom: 8px;
+            background: white;
+        }
+        .ability-name {
+            font-size: 8pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #8b6914;
+        }
+        .ability-mod {
+            font-size: 20pt;
+            font-weight: bold;
+            margin: 4px 0;
+        }
+        .ability-score {
+            font-size: 9pt;
+            color: #666;
+        }
+        .combat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .combat-box {
+            border: 1px solid #2c241b;
+            text-align: center;
+            padding: 5px;
+            background: white;
+        }
+        .combat-label {
+            font-size: 7pt;
+            text-transform: uppercase;
+            color: #8b6914;
+        }
+        .combat-value {
+            font-size: 14pt;
+            font-weight: bold;
+        }
+        .hp-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .hp-box {
+            border: 2px solid #2c241b;
+            text-align: center;
+            padding: 6px;
+            background: white;
+        }
+        .hp-label {
+            font-size: 7pt;
+            text-transform: uppercase;
+            color: #8b6914;
+        }
+        .hp-value {
+            font-size: 16pt;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        th, td {
+            border: 1px solid #d4c4a8;
+            padding: 4px;
+            text-align: left;
+            font-size: 9pt;
+        }
+        th {
+            background: #f4f1e8;
+            font-weight: bold;
+            font-size: 8pt;
+            text-transform: uppercase;
+        }
+        .skills-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+        }
+        .skill-row {
+            font-size: 9pt;
+            border-bottom: 1px dotted #d4c4a8;
+            padding: 2px 0;
+        }
+        .coins-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+            margin-top: 8px;
+        }
+        .coin-box {
+            text-align: center;
+            border: 1px solid #2c241b;
+            padding: 3px;
+            background: white;
+        }
+        .coin-label {
+            font-size: 7pt;
+            color: #8b6914;
+        }
+        .coin-value {
+            font-weight: bold;
+        }
+        .text-block {
+            border: 1px solid #d4c4a8;
+            padding: 6px;
+            min-height: 40px;
+            background: white;
+            margin-bottom: 8px;
+            font-size: 9pt;
+        }
+        .footer {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #d4c4a8;
+            text-align: center;
+            font-size: 8pt;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>⚔️ {{ character.char_name or 'Безымянный герой' }}</h1>
+
+    <!-- Шапка -->
+    <div class="header-grid">
+        <div class="field">
+            <div class="field-label">Класс и уровень</div>
+            <div class="field-value">{{ character.class_level or '—' }}</div>
+        </div>
+        <div class="field">
+            <div class="field-label">Раса</div>
+            <div class="field-value">{{ character.race or '—' }}</div>
+        </div>
+        <div class="field">
+            <div class="field-label">Предыстория</div>
+            <div class="field-value">{{ character.background or '—' }}</div>
+        </div>
+        <div class="field">
+            <div class="field-label">Мировоззрение</div>
+            <div class="field-value">{{ character.alignment or '—' }}</div>
+        </div>
+        <div class="field">
+            <div class="field-label">Опыт</div>
+            <div class="field-value">{{ character.xp or 0 }} XP</div>
+        </div>
+        <div class="field">
+            <div class="field-label">Бонус мастерства</div>
+            <div class="field-value">+{{ character.prof_bonus or 2 }}</div>
+        </div>
+    </div>
+
+    <div class="main-grid">
+        <!-- Левая колонка: Характеристики -->
+        <div class="column">
+            {% for key, name in [('str_score','СИЛА'), ('dex_score','ЛОВКОСТЬ'), ('con_score','ТЕЛОСЛОЖЕНИЕ'),
+                                  ('int_score','ИНТЕЛЛЕКТ'), ('wis_score','МУДРОСТЬ'), ('cha_score','ХАРИЗМА')] %}
+            <div class="ability-box">
+                <div class="ability-name">{{ name }}</div>
+                {% set val = character[key] if character[key] else 10 %}
+                {% set mod = (val - 10) // 2 %}
+                <div class="ability-mod">{{ '+' + mod|string if mod >= 0 else mod }}</div>
+                <div class="ability-score">{{ val }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Центральная колонка -->
+        <div class="column">
+            <!-- Боевые параметры -->
+            <div class="section">
+                <div class="section-title">⚔️ Боевые параметры</div>
+                <div class="combat-grid">
+                    <div class="combat-box">
+                        <div class="combat-label">Класс доспеха</div>
+                        <div class="combat-value">{{ character.ac or 10 }}</div>
+                    </div>
+                    <div class="combat-box">
+                        <div class="combat-label">Инициатива</div>
+                        {% set dex = character.dex_score if character.dex_score else 10 %}
+                        {% set mod = (dex - 10) // 2 %}
+                        <div class="combat-value">{{ '+' + mod|string if mod >= 0 else mod }}</div>
+                    </div>
+                    <div class="combat-box">
+                        <div class="combat-label">Скорость</div>
+                        <div class="combat-value">{{ character.speed or 30 }}'</div>
+                    </div>
+                    <div class="combat-box">
+                        <div class="combat-label">Размер</div>
+                        <div class="combat-value">Средний</div>
+                    </div>
+                </div>
+                <div class="hp-grid">
+                    <div class="hp-box">
+                        <div class="hp-label">Текущие ОЗ</div>
+                        <div class="hp-value">{{ character.hp_current or 10 }}</div>
+                    </div>
+                    <div class="hp-box">
+                        <div class="hp-label">Макс. ОЗ</div>
+                        <div class="hp-value">{{ character.hp_max or 10 }}</div>
+                    </div>
+                    <div class="hp-box">
+                        <div class="hp-label">Врем. ОЗ</div>
+                        <div class="hp-value">{{ character.hp_temp or 0 }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Атаки -->
+            <div class="section">
+                <div class="section-title">⚔️ Атаки</div>
+                <table>
+                    <thead>
+                        <tr><th>Название</th><th>Бонус</th><th>Урон</th></tr>
+                    </thead>
+                    <tbody>
+                        {% set attacks = character.attacks if character.attacks else [] %}
+                        {% for i in range(6) %}
+                        {% if i < attacks|length %}
+                        <tr>
+                            <td>{{ attacks[i].name }}</td>
+                            <td>{{ attacks[i].bonus }}</td>
+                            <td>{{ attacks[i].dmg }}</td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Особенности -->
+            <div class="section">
+                <div class="section-title">✨ Особенности и черты</div>
+                <div class="text-block">{{ character.features or '—' }}</div>
+            </div>
+        </div>
+
+        <!-- Правая колонка -->
+        <div class="column">
+            <!-- Снаряжение -->
+            <div class="section">
+                <div class="section-title">🎒 Снаряжение</div>
+                <div class="text-block" style="min-height: 60px;">{{ character.equipment or '—' }}</div>
+                <div class="coins-grid">
+                    {% for coin in [('copper','ММ'), ('silver','СМ'), ('electrum','ЭМ'), ('gold','ЗМ'), ('platinum','ПМ')] %}
+                    <div class="coin-box">
+                        <div class="coin-label">{{ coin[1] }}</div>
+                        {% set coin_val = character.coins[coin[0]] if character.coins and coin[0] in character.coins else 0 %}
+                        <div class="coin-value">{{ coin_val }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Личность -->
+            <div class="section">
+                <div class="section-title">🧠 Личность</div>
+                <div class="text-block"><strong>Черты:</strong> {{ character.personality_traits or '—' }}</div>
+                <div class="text-block"><strong>Идеалы:</strong> {{ character.ideals or '—' }}</div>
+                <div class="text-block"><strong>Привязанности:</strong> {{ character.bonds or '—' }}</div>
+                <div class="text-block"><strong>Изъяны:</strong> {{ character.flaws or '—' }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Создано с помощью D&D Character Creator • {{ current_user.login }} • {{ character.char_name }}</p>
+    </div>
+</body>
+</html>

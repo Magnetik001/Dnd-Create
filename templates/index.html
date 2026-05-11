@@ -3,304 +3,574 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Главная • D&D Character Creator</title>
+    <title>Таверна Героев • D&D Creator</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --dnd-dark: #1a1a2e;
-            --dnd-darker: #0f0f1a;
-            --dnd-accent: #c9a227;
-            --dnd-accent-hover: #e6c35c;
-            --dnd-text: #e0e0e0;
+            --dnd-bg: #0a0a12;
+            --dnd-card: rgba(26, 26, 46, 0.85);
             --dnd-border: #3a3a5a;
-            --dnd-card-bg: rgba(30, 30, 50, 0.85);
+            --dnd-accent: #c9a227;
+            --dnd-accent-glow: rgba(201, 162, 39, 0.4);
+            --dnd-text: #e0e0e0;
+            --dnd-muted: #8a8aa0;
+            --class-fighter: #e74c3c;
+            --class-mage: #9b59b6;
+            --class-rogue: #2ecc71;
+            --class-cleric: #f1c40f;
+            --class-default: #3498db;
         }
 
+        /* === Анимированный фон === */
         body {
-            background: linear-gradient(135deg, var(--dnd-darker) 0%, var(--dnd-dark) 100%);
+            background:
+                radial-gradient(ellipse at top, rgba(25, 25, 45, 0.4) 0%, transparent 70%),
+                radial-gradient(ellipse at bottom right, rgba(201, 162, 39, 0.08) 0%, transparent 50%),
+                linear-gradient(135deg, var(--dnd-bg) 0%, #121220 100%);
             font-family: 'Roboto', sans-serif;
             color: var(--dnd-text);
             min-height: 100vh;
             margin: 0;
-            padding-top: 80px; /* Отступ под фиксированную шапку */
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Магические частицы (анимация) */
+        .magic-particles {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0;
+            background-image:
+                radial-gradient(2px 2px at 20px 30px, var(--dnd-accent), transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(201, 162, 39, 0.6), transparent),
+                radial-gradient(2px 2px at 90px 40px, var(--dnd-accent), transparent),
+                radial-gradient(2px 2px at 160px 120px, rgba(201, 162, 39, 0.6), transparent);
+            background-size: 200px 200px;
+            animation: float 20s linear infinite;
+            opacity: 0.3;
+        }
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-200px) rotate(360deg); }
         }
 
         /* === Навигация === */
         .nav-dnd {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            height: 70px;
-            background: rgba(15, 15, 26, 0.95);
-            backdrop-filter: blur(10px);
+            position: fixed; top: 0; left: 0; right: 0; height: 70px;
+            background: rgba(10, 10, 18, 0.95); backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--dnd-border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 2rem;
-            z-index: 1000;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 2rem; z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
         .nav-brand {
-            font-family: 'Cinzel', serif;
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--dnd-accent);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 900;
+            color: var(--dnd-accent); text-decoration: none;
+            display: flex; align-items: center; gap: 0.5rem;
+            text-shadow: 0 0 10px var(--dnd-accent-glow);
+            transition: transform 0.2s;
         }
-        .nav-actions {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
+        .nav-brand:hover { transform: scale(1.05); }
+        .dice-btn {
+            font-size: 1.5rem; cursor: pointer; user-select: none;
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: inline-block;
         }
+        .dice-btn.rolling { animation: roll 0.6s ease-in-out; }
+        @keyframes roll {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-90deg) scale(1.1); }
+            50% { transform: rotate(180deg) scale(0.9); }
+            75% { transform: rotate(90deg) scale(1.1); }
+        }
+
+        .nav-actions { display: flex; gap: 0.8rem; align-items: center; }
         .nav-btn {
-            color: var(--dnd-text);
-            text-decoration: none;
-            font-size: 0.95rem;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-            border: 1px solid transparent;
+            color: var(--dnd-text); text-decoration: none; font-size: 0.9rem;
+            padding: 0.5rem 1rem; border: 1px solid var(--dnd-border);
+            border-radius: 8px; transition: all 0.2s; background: transparent;
+            display: flex; align-items: center; gap: 0.4rem;
         }
         .nav-btn:hover {
-            color: var(--dnd-accent);
-            border-color: var(--dnd-border);
-            background: rgba(201, 162, 39, 0.05);
+            color: var(--dnd-accent); border-color: var(--dnd-accent);
+            background: rgba(201, 162, 39, 0.05); box-shadow: 0 0 15px var(--dnd-accent-glow);
         }
-        .nav-btn.logout {
-            color: #ff6b6b;
-        }
-        .nav-btn.logout:hover {
-            background: rgba(255, 107, 107, 0.1);
-            border-color: rgba(255, 107, 107, 0.3);
-        }
+        .nav-btn.logout { color: #ff6b6b; border-color: rgba(255,107,107,0.3); }
+        .nav-btn.logout:hover { background: rgba(255,107,107,0.1); border-color: #ff6b6b; }
 
         /* === Основной контент === */
-        .dashboard-container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 2rem;
+        .main-wrapper {
+            flex: 1; padding-top: 90px; padding-bottom: 3rem;
+            position: relative; z-index: 1;
         }
+        .container-custom { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
 
-        /* Приветственный блок */
-        .welcome-section {
-            background: var(--dnd-card-bg);
-            border: 1px solid var(--dnd-border);
-            border-radius: 16px;
-            padding: 2.5rem;
-            text-align: center;
-            margin-bottom: 2.5rem;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        /* === Герой-секция (лендинг) === */
+        .hero-section {
+            text-align: center; padding: 5rem 1rem 4rem;
+            max-width: 900px; margin: 0 auto;
+            animation: fadeInUp 0.6s ease-out;
         }
-        .welcome-section::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; height: 3px;
-            background: linear-gradient(90deg, transparent, var(--dnd-accent), transparent);
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .welcome-title {
-            font-family: 'Cinzel', serif;
-            font-size: 2.2rem;
-            margin-bottom: 0.5rem;
-            color: #fff;
+        .hero-title {
+            font-family: 'Cinzel', serif; font-size: 3.5rem; font-weight: 900;
+            color: #fff; margin-bottom: 1rem; line-height: 1.1;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.6);
+            background: linear-gradient(135deg, #fff 0%, var(--dnd-accent) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        .accent-text {
-            color: var(--dnd-accent);
-            text-shadow: 0 0 8px rgba(201, 162, 39, 0.4);
+        .hero-subtitle {
+            color: var(--dnd-muted); font-size: 1.3rem; line-height: 1.6;
+            margin: 0 auto 3rem; max-width: 700px;
         }
-        .welcome-desc {
-            color: #a0a0b5;
-            font-size: 1.1rem;
-            margin-bottom: 1.5rem;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        /* Кнопка создания */
-        .btn-create-hero {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.6rem;
+        .cta-primary {
+            display: inline-flex; align-items: center; gap: 0.8rem;
             background: linear-gradient(135deg, var(--dnd-accent) 0%, #a6841e 100%);
-            color: var(--dnd-darker);
-            font-family: 'Cinzel', serif;
-            font-weight: 700;
-            font-size: 1.1rem;
-            padding: 0.9rem 2rem;
-            border-radius: 10px;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 15px rgba(201, 162, 39, 0.25);
+            color: #0a0a12; font-family: 'Cinzel', serif; font-weight: 700;
+            font-size: 1.2rem; padding: 1rem 2.5rem; border-radius: 12px;
+            text-decoration: none; transition: all 0.3s ease;
+            box-shadow: 0 6px 25px rgba(201, 162, 39, 0.4);
+            border: 2px solid transparent;
         }
-        .btn-create-hero:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(201, 162, 39, 0.4);
-            background: linear-gradient(135deg, var(--dnd-accent-hover) 0%, #c9a227 100%);
-            color: #0f0f1a;
+        .cta-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 35px rgba(201, 162, 39, 0.6);
+            border-color: rgba(255,255,255,0.3);
+            color: #050508;
         }
 
-        /* Сетка персонажей */
-        .section-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1.2rem;
+        /* === Карточки преимуществ === */
+        .features-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem; margin-top: 4rem;
+        }
+        .feature-card {
+            background: var(--dnd-card); border: 1px solid var(--dnd-border);
+            border-radius: 16px; padding: 2rem; text-align: center;
+            transition: all 0.3s ease; position: relative; overflow: hidden;
+        }
+        .feature-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, transparent, var(--dnd-accent), transparent);
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-6px); border-color: var(--dnd-accent);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+        }
+        .feature-card:hover::before { opacity: 1; }
+        .feature-icon {
+            font-size: 2.5rem; margin-bottom: 1rem;
+            display: inline-block; animation: bounce 2s infinite;
+        }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .feature-title {
+            font-family: 'Cinzel', serif; color: #fff; margin: 0.5rem 0 0.5rem; font-size: 1.2rem;
+        }
+        .feature-desc { color: var(--dnd-muted); font-size: 0.95rem; margin: 0; }
+
+        /* === Дашборд (авторизованный) === */
+        .dashboard-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 2.5rem; padding-bottom: 1.5rem;
             border-bottom: 1px solid var(--dnd-border);
-            padding-bottom: 0.5rem;
+            animation: fadeInUp 0.6s ease-out 0.1s backwards;
+        }
+        .welcome-block h1 {
+            font-family: 'Cinzel', serif; font-size: 2.2rem; color: #fff; margin: 0 0 0.5rem;
+        }
+        .welcome-block .accent {
+            color: var(--dnd-accent); text-shadow: 0 0 12px var(--dnd-accent-glow);
+        }
+        .welcome-block p { color: var(--dnd-muted); margin: 0; font-size: 1.05rem; }
+
+        .stats-bar {
+            display: flex; gap: 1.5rem; background: var(--dnd-card);
+            border: 1px solid var(--dnd-border); border-radius: 12px;
+            padding: 1rem 1.5rem; margin-bottom: 2rem;
+            animation: fadeInUp 0.6s ease-out 0.2s backwards;
+        }
+        .stat-item { text-align: center; min-width: 100px; }
+        .stat-value {
+            font-family: 'Cinzel', serif; font-size: 1.8rem; font-weight: 700;
+            color: var(--dnd-accent); display: block;
+        }
+        .stat-label { color: var(--dnd-muted); font-size: 0.85rem; }
+
+        /* === Сетка персонажей === */
+        .section-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin: 2.5rem 0 1.5rem; animation: fadeInUp 0.6s ease-out 0.3s backwards;
         }
         .section-title {
-            font-family: 'Cinzel', serif;
-            font-size: 1.5rem;
-            color: #fff;
-            margin: 0;
+            font-family: 'Cinzel', serif; font-size: 1.6rem; color: #fff; margin: 0;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .section-title::before {
+            content: '⚔️'; font-size: 1.3rem;
         }
 
         .heroes-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 1.5rem;
         }
 
         .hero-card {
-            background: var(--dnd-card-bg);
-            border: 1px solid var(--dnd-border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            transition: all 0.2s ease;
-            min-height: 180px;
-            justify-content: center;
+            background: var(--dnd-card); border: 2px solid var(--dnd-border);
+            border-radius: 16px; padding: 1.5rem; position: relative;
+            transition: all 0.3s ease; cursor: pointer;
+            animation: fadeInUp 0.6s ease-out backwards;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+        .hero-card::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(201,162,39,0.05), transparent 60%);
+            opacity: 0; transition: opacity 0.3s; pointer-events: none;
         }
         .hero-card:hover {
-            transform: translateY(-3px);
+            transform: translateY(-5px) scale(1.02);
             border-color: var(--dnd-accent);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.5), 0 0 30px var(--dnd-accent-glow);
         }
-        .hero-silhouette {
-            font-size: 3rem;
-            margin-bottom: 0.5rem;
-            opacity: 0.8;
+        .hero-card:hover::after { opacity: 1; }
+
+        /* Цветные рамки по классам */
+        .hero-card.class-fighter { border-color: var(--class-fighter); }
+        .hero-card.class-fighter:hover { box-shadow: 0 15px 50px rgba(231, 76, 60, 0.3); }
+        .hero-card.class-mage { border-color: var(--class-mage); }
+        .hero-card.class-mage:hover { box-shadow: 0 15px 50px rgba(155, 89, 182, 0.3); }
+        .hero-card.class-rogue { border-color: var(--class-rogue); }
+        .hero-card.class-rogue:hover { box-shadow: 0 15px 50px rgba(46, 204, 113, 0.3); }
+
+        .hero-header {
+            display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;
+            padding-bottom: 1rem; border-bottom: 1px solid var(--dnd-border);
         }
-        .hero-name {
-            font-family: 'Cinzel', serif;
-            font-size: 1.1rem;
-            color: #fff;
-            margin-bottom: 0.3rem;
+        .hero-avatar {
+            width: 50px; height: 50px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--dnd-accent), #7a6215);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; font-weight: 700; color: #0a0a12;
+            flex-shrink: 0;
+        }
+        .hero-info h3 {
+            font-family: 'Cinzel', serif; font-size: 1.3rem; color: #fff;
+            margin: 0 0 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .hero-meta {
-            font-size: 0.9rem;
-            color: #8a8aa0;
-            margin: 0;
+            font-size: 0.9rem; color: var(--dnd-muted); margin: 0;
+        }
+        .hero-class-badge {
+            display: inline-block; padding: 0.2rem 0.6rem;
+            background: rgba(201, 162, 39, 0.15); border: 1px solid var(--dnd-accent);
+            border-radius: 20px; font-size: 0.8rem; color: var(--dnd-accent);
+            margin-top: 0.3rem;
         }
 
-        /* Пустая карточка (добавить) */
-        .hero-card.empty {
-            border-style: dashed;
-            cursor: pointer;
-            opacity: 0.7;
+        /* Прогресс опыта */
+        .xp-bar {
+            margin: 1rem 0; background: rgba(15,15,25,0.6);
+            border-radius: 6px; height: 6px; overflow: hidden;
         }
-        .hero-card.empty:hover {
-            opacity: 1;
+        .xp-fill {
+            height: 100%; background: linear-gradient(90deg, var(--dnd-accent), #e6c35c);
+            border-radius: 6px; transition: width 0.5s ease;
+            width: var(--xp-percent, 30%);
+        }
+        .xp-text {
+            font-size: 0.8rem; color: var(--dnd-muted); text-align: right;
+            margin-top: 0.3rem;
+        }
+
+        /* Кнопки действий */
+        .hero-actions {
+            display: flex; gap: 0.5rem; margin-top: auto; padding-top: 1rem;
+            border-top: 1px solid var(--dnd-border);
+        }
+        .action-btn {
+            flex: 1; padding: 0.5rem; border: 1px solid var(--dnd-border);
+            background: transparent; color: var(--dnd-text);
+            border-radius: 6px; cursor: pointer; transition: all 0.2s;
+            font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 0.3rem;
+        }
+        .action-btn:hover {
+            border-color: var(--dnd-accent); color: var(--dnd-accent);
             background: rgba(201, 162, 39, 0.05);
         }
-        .empty-icon {
-            font-size: 2.5rem;
-            color: var(--dnd-accent);
-            margin-bottom: 0.5rem;
-        }
-        .empty-text {
-            font-family: 'Cinzel', serif;
-            color: var(--dnd-accent);
-            font-size: 0.95rem;
-        }
+        .action-btn.delete { color: #ff6b6b; border-color: rgba(255,107,107,0.3); }
+        .action-btn.delete:hover { background: rgba(255,107,107,0.1); border-color: #ff6b6b; }
 
-        /* Анимация появления */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Пустая карточка "Создать" */
+        .hero-card.empty {
+            border-style: dashed; justify-content: center; align-items: center;
+            min-height: 220px; opacity: 0.8;
         }
-        .welcome-section, .hero-card {
-            animation: fadeInUp 0.4s ease-out backwards;
+        .hero-card.empty:hover { opacity: 1; background: rgba(201, 162, 39, 0.05); }
+        .empty-icon { font-size: 3rem; margin-bottom: 0.5rem; color: var(--dnd-accent); }
+        .empty-text { font-family: 'Cinzel', serif; color: var(--dnd-accent); font-size: 1rem; }
+
+        /* Заглушка списка */
+        .hero-list-placeholder {
+            background: var(--dnd-card); border: 2px dashed var(--dnd-border);
+            border-radius: 16px; padding: 3rem 2rem; text-align: center;
+            margin-top: 1rem; animation: pulse 2s infinite;
         }
-        .hero-card:nth-child(2) { animation-delay: 0.1s; }
-        .hero-card:nth-child(3) { animation-delay: 0.2s; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .hero-list-placeholder a {
+            color: var(--dnd-accent); text-decoration: none; font-weight: 600;
+            transition: color 0.2s;
+        }
+        .hero-list-placeholder a:hover { color: var(--dnd-accent-hover); text-decoration: underline; }
+
+        /* === Футер === */
+        .dnd-footer {
+            text-align: center; padding: 2rem 1rem; color: var(--dnd-muted);
+            font-size: 0.9rem; border-top: 1px solid var(--dnd-border);
+            background: rgba(10, 10, 18, 0.8); margin-top: auto;
+            position: relative; z-index: 1;
+        }
 
         /* Адаптив */
         @media (max-width: 768px) {
             .nav-dnd { padding: 0 1rem; }
-            .dashboard-container { padding: 1rem; }
-            .welcome-title { font-size: 1.8rem; }
-            .welcome-section { padding: 1.5rem; }
+            .hero-title { font-size: 2.5rem; }
+            .hero-subtitle { font-size: 1.1rem; }
+            .stats-bar { flex-wrap: wrap; justify-content: center; }
+            .dashboard-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
         }
     </style>
 </head>
 <body>
+    <!-- Магический фон -->
+    <div class="magic-particles"></div>
 
     <!-- Навигация -->
     <nav class="nav-dnd">
-        <a href="{{ url_for('index') }}" class="nav-brand">🎲 D&D Creator</a>
+        <a href="{{ url_for('index') }}" class="nav-brand">
+            <span class="dice-btn" id="navDice" title="Бросить кубик!">🎲</span>
+            D&D Creator
+        </a>
+        {% if current_user.is_authenticated %}
         <div class="nav-actions">
-            <!-- 👤 Профиль пользователя -->
-            <a href="{{ url_for('profile') }}" class="nav-btn">👤 {{ user.login }}</a>
-            <!-- 🚪 Выход -->
-            <a href="{{ url_for('logout') }}" class="nav-btn logout">Выйти</a>
+            <a href="{{ url_for('profile') }}" class="nav-btn">👤 {{ current_user.login }}</a>
+            <a href="{{ url_for('logout') }}" class="nav-btn logout">🚪 Выйти</a>
         </div>
+        {% else %}
+        <div class="nav-actions">
+            <a href="{{ url_for('login') }}" class="nav-btn">🔐 Войти</a>
+            <a href="{{ url_for('register') }}" class="nav-btn" style="border-color: var(--dnd-accent); color: var(--dnd-accent);">⚔️ Регистрация</a>
+        </div>
+        {% endif %}
     </nav>
 
     <!-- Основной контент -->
-    <main class="dashboard-container">
+    <div class="main-wrapper">
+        <div class="container-custom">
 
-        <!-- Приветственный блок -->
-        <section class="welcome-section">
-            <h1 class="welcome-title">Добро пожаловать, <span class="accent-text">{{ user.login }}</span>!</h1>
-            <p class="welcome-desc">Твои приключения начинаются здесь. Создай уникального героя, настрой характеристики и вступи в бой.</p>
+            {% if current_user.is_authenticated %}
+                <!-- 👑 ДАШБОРД -->
 
-            <!-- 🔘 Кнопка создания персонажа -->
-            <a href="{{ url_for('create_character') }}" class="btn-create-hero">
-                ⚔️ Создать персонажа
-            </a>
-        </section>
+                <!-- Заголовок -->
+                <header class="dashboard-header">
+                    <div class="welcome-block">
+                        <h1>Приветствуем, <span class="accent">{{ current_user.login }}</span>!</h1>
+                        <p>Твой путь в мире приключений продолжается. Управляй героями или создай нового.</p>
+                    </div>
+                    <a href="{{ url_for('create_character') }}" class="cta-primary">
+                        ✨ Создать героя
+                    </a>
+                </header>
 
-        <!-- Список персонажей -->
-        <section class="heroes-section">
-            <div class="section-header">
-                <h2 class="section-title">📜 Мои герои</h2>
-            </div>
-
-            <div class="heroes-grid">
-                <!-- Заглушка: будет появляться когда персонажей нет -->
-                <a href="{{ url_for('create_character') }}" class="hero-card empty">
-                    <div class="empty-icon">+</div>
-                    <div class="empty-text">Новый герой</div>
-                </a>
-
-                <!-- 💡 Пример того, как будет выглядеть карточка персонажа в будущем -->
-                <!--
-                <div class="hero-card">
-                    <div class="hero-silhouette">🛡️</div>
-                    <h3 class="hero-name">Арагорн</h3>
-                    <p class="hero-meta">Человек • Следопыт • Ур. 5</p>
+                <!-- Статистика -->
+                <div class="stats-bar">
+                    <div class="stat-item">
+                        <span class="stat-value">{{ characters|length }}</span>
+                        <span class="stat-label">Героев</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">{{ stats.avg_level }}</span>
+                        <span class="stat-label">Ср. уровень</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">🏆</span>
+                        <span class="stat-label">Достижения</span>
+                    </div>
                 </div>
-                -->
-            </div>
-        </section>
 
-    </main>
+                <!-- Список персонажей -->
+                <section>
+                    <div class="section-header">
+                        <h2 class="section-title">Твои герои</h2>
+                    </div>
+
+                    {% if characters and characters|length > 0 %}
+                    <div class="heroes-grid">
+                        {% for char in characters %}
+                        {% set class_lower = (char.class_level or '').lower() %}
+                        {% set class_type = 'fighter' if 'воин' in class_lower or 'fighter' in class_lower else 'mage' if 'маг' in class_lower or 'wizard' in class_lower or 'волшебник' in class_lower else 'rogue' if 'плут' in class_lower or 'rogue' in class_lower or 'вор' in class_lower else 'cleric' if 'жрец' in class_lower or 'cleric' in class_lower else 'default' %}
+
+                        <a href="{{ url_for('edit_character', char_id=char.id) }}" class="hero-card class-{{ class_type }}" style="--xp-percent: {{ (char.xp % 1000) / 10 }}%">
+                            <div class="hero-header">
+                                <div class="hero-avatar">
+                                    {% if class_type == 'fighter' %}⚔️
+                                    {% elif class_type == 'mage' %}🔮
+                                    {% elif class_type == 'rogue' %}🗡️
+                                    {% elif class_type == 'cleric' %}⚕️
+                                    {% else %}🛡️{% endif %}
+                                </div>
+                                <div class="hero-info">
+                                    <h3>{{ char.char_name }}</h3>
+                                    <p class="hero-meta">{{ char.race or 'Неизвестная раса' }}</p>
+                                    {% if char.class_level %}
+                                    <span class="hero-class-badge">{{ char.class_level }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Прогресс опыта -->
+                            <div class="xp-bar">
+                                <div class="xp-fill"></div>
+                            </div>
+                            <div class="xp-text">Опыт: {{ char.xp or 0 }} XP</div>
+
+                            <!-- Кнопки действий -->
+                            <div class="hero-actions">
+                                <span class="action-btn">✏️ Редактировать</span>
+                                <form action="{{ url_for('delete_character', char_id=char.id) }}" method="POST" style="flex:1;" onsubmit="return confirm('Удалить «{{ char.char_name }}»? Это действие необратимо.');">
+                                    <button type="submit" class="action-btn delete" style="width:100%;">🗑️</button>
+                                </form>
+                            </div>
+                        </a>
+                        {% endfor %}
+
+                        <!-- Кнопка "Создать ещё" -->
+                        <a href="{{ url_for('create_character') }}" class="hero-card empty">
+                            <div class="empty-icon">+</div>
+                            <div class="empty-text">Новый герой</div>
+                        </a>
+                    </div>
+                    {% else %}
+                    <!-- Пустой список -->
+                    <div class="hero-list-placeholder">
+                        <p style="font-size: 1.2rem; margin-bottom: 1rem;">📜 Твой отряд ещё пуст...</p>
+                        <p style="color: var(--dnd-muted); margin-bottom: 1.5rem;">Создай первого героя и начни своё великое приключение!</p>
+                        <a href="{{ url_for('create_character') }}" class="cta-primary" style="padding: 0.8rem 2rem; font-size: 1rem;">
+                            ⚔️ Создать персонажа
+                        </a>
+                    </div>
+                    {% endif %}
+                </section>
+
+            {% else %}
+                <!-- 🌍 ЛЕНДИНГ (для гостей) -->
+                <main class="hero-section">
+                    <h1 class="hero-title">Создай Легенду.<br>Начни Приключение.</h1>
+                    <p class="hero-subtitle">
+                        Профессиональный конструктор листов персонажей D&D 5-й редакции.
+                        Настраивай характеристики, экипировку и предысторию в красивом интерфейсе.
+                        Сохраняй прогресс и возвращайся к своим героям в любой момент.
+                    </p>
+
+                    <a href="{{ url_for('register') }}" class="cta-primary">
+                        🎲 Начать бесплатно
+                    </a>
+
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">📊</div>
+                            <h3 class="feature-title">Живые Характеристики</h3>
+                            <p class="feature-desc">Автоматический расчёт модификаторов, инициативы и спасбросков в реальном времени.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🛡️</div>
+                            <h3 class="feature-title">Полный Лист 5e</h3>
+                            <p class="feature-desc">Все разделы официального листа: бой, здоровье, атаки, заклинания, инвентарь и личность.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">💾</div>
+                            <h3 class="feature-title">Облачное Хранение</h3>
+                            <p class="feature-desc">Твои персонажи безопасно хранятся в базе данных и доступны с любого устройства.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🖨️</div>
+                            <h3 class="feature-title">Экспорт в PDF</h3>
+                            <p class="feature-desc">Распечатай лист или сохрани как PDF для игры за столом или онлайн.</p>
+                        </div>
+                    </div>
+                </main>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- Футер -->
+    <footer class="dnd-footer">
+        <p>© 2026 D&D Character Creator • Создано с ❤️, 🎲 и магией кода</p>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem; opacity: 0.7;">
+            Dungeons & Dragons является товарным знаком Wizards of the Coast. Этот проект не аффилирован с официальной компанией.
+        </p>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Небольшой UX: подсветка пустой карточки при наведении
-        document.querySelectorAll('.hero-card.empty').forEach(card => {
-            card.addEventListener('mouseenter', () => card.style.borderColor = 'var(--dnd-accent)');
-            card.addEventListener('mouseleave', () => card.style.borderColor = 'var(--dnd-border)');
+        // === Анимация кубика в навигации ===
+        const diceBtn = document.getElementById('navDice');
+        if (diceBtn) {
+            diceBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                diceBtn.classList.add('rolling');
+
+                // Эффект "броска" со случайным результатом
+                const faces = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+                let rolls = 0;
+                const interval = setInterval(() => {
+                    diceBtn.textContent = faces[Math.floor(Math.random() * 6)];
+                    rolls++;
+                    if (rolls > 10) {
+                        clearInterval(interval);
+                        // Финальный результат
+                        diceBtn.textContent = faces[Math.floor(Math.random() * 6)];
+                        diceBtn.classList.remove('rolling');
+
+                        // Небольшая вибрация при результате
+                        diceBtn.style.transform = 'scale(1.2)';
+                        setTimeout(() => diceBtn.style.transform = '', 200);
+                    }
+                }, 80);
+            });
+        }
+
+        // === Плавное появление карточек при скролле ===
+        const observerOptions = { threshold: 0.1 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.hero-card').forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = `opacity 0.4s ease, transform 0.4s ease ${index * 0.1}s`;
+            observer.observe(card);
+        });
+
+        // === Подсказки при наведении на кнопки действий ===
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.05)';
+            });
+            btn.addEventListener('mouseleave', function() {
+                this.style.transform = '';
+            });
         });
     </script>
 </body>
